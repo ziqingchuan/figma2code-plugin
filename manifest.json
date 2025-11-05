@@ -10,9 +10,7 @@
   "documentAccess": "dynamic-page",
   "networkAccess": {
     "allowedDomains": [
-      "https://api.deepseek.com/chat/completions",
-      "https://api.coze.cn/v1/workflow/run",
-      "https://beta-one.thethinkacademy.com"
+      "https://api.coze.cn/v1/workflow/run"
     ]
   },
   "codegenLanguages": [
