@@ -1,0 +1,21 @@
+{
+  "name": "figma2html",
+  "id": "1539124463849863689",
+  "api": "1.0.0",
+  "main": "apps/plugin/dist/code.js",
+  "ui": "apps/plugin/dist/index.html",
+  "editorType": ["figma", "dev"],
+  "capabilities": ["inspect", "codegen", "vscode"],
+  "permissions": [],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": [
+      "https://api.deepseek.com/chat/completions",
+      "https://api.coze.cn/v1/workflow/run",
+      "https://beta-one.thethinkacademy.com"
+    ]
+  },
+  "codegenLanguages": [
+    { "label": "HTML", "value": "html" }
+  ]
+}
