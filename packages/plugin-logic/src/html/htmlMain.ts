@@ -171,20 +171,6 @@ const optimizeOutput = async (output: HtmlOutput): Promise<HtmlOutput> => {
   return output;
 };
 
-// /**
-//  * 模拟AI处理延迟
-//  * @param data 输入数据
-//  * @returns 返回处理后的数据
-//  */
-// export const mockTimeOut = async (data: any): Promise<any> => {
-//   return new Promise((resolve) => {
-//     // console.log('[调试] 开始模拟AI处理延迟...');
-//     setTimeout(() => {
-//       // console.log('[调试] AI处理完成');
-//       resolve([{  }]);
-//     }, 1000);
-//   });
-// };
 
 /**
  * 生成HTML预览
