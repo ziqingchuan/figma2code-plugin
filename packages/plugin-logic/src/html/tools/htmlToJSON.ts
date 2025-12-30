@@ -122,30 +122,7 @@ export const parseHTMLToNodes = (htmlString: string): any => {
 
     let classID: string;
     classID = classNameIndex.toString();
-    classNameIndex++;
-
-    // if(!useAI){
-      /** 人工生成类名 */
-      // className = generateSemanticClassName(tagName, styleID, content, parentInfo, styleMap);
-    // }
-      /** 调用AI单独为单个元素生成类名 */
-      // const singleNode = {
-      //   tag: tagName,
-      //   style: style,
-      //   content: content,
-      //   isSVG: isSVG,
-      //   parentInfo: parentInfo,
-      //   children: children
-      // }
-      //
-      // // console.log("节点信息：", singleNode);
-      //
-      // // const className = "";
-      // let className = "";
-      // DSSingle(singleNode).then(res => {
-      //   className = res;
-      //   // console.log("生成的语义化类名：", className);
-      // });
+    classNameIndex++;  
 
 
     return {

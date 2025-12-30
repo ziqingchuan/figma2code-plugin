@@ -18,7 +18,6 @@ const CodePanel = (props: CodePanelProps) => {
   } = props;
   const isCodeEmpty = code === "";
 
-  // Function to truncate code to a specific number of lines
   const truncateCode = (codeString: string, lines: number) => {
     const codeLines = codeString.split("\n");
     if (codeLines.length <= lines) {
@@ -28,13 +27,11 @@ const CodePanel = (props: CodePanelProps) => {
   };
 
   const prefixedCode = code;
-  // Memoize the line count calculation to improve performance for large code blocks
   const lineCount = useMemo(
     () => prefixedCode.split("\n").length,
     [prefixedCode],
   );
 
-  // Determine if code should be truncated
   const shouldTruncate = !isExpanded && lineCount > initialLinesToShow;
   const displayedCode = shouldTruncate
     ? truncateCode(prefixedCode, initialLinesToShow)

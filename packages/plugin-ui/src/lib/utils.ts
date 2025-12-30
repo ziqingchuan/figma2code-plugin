@@ -1,15 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-/**
- * 合并Tailwind类名工具函数
- * @param inputs 类名数组或对象
- * @returns 合并后的类名字符串
- *
- * 功能说明：
- * 1. 使用clsx处理类名合并
- * 2. 使用twMerge处理Tailwind类名冲突
- */
+
 export function cn(...inputs: ClassValue[]): string {
   // console.log('[类名处理] 开始合并类名');
   const mergedClasses = twMerge(clsx(inputs));
