@@ -1,6 +1,5 @@
 // @ts-nocheck
 import { addWarning } from "../common/commonWarning";
-import { PluginSettings } from "types";
 import { HasGeometryTrait, Node, Paint } from "../api_types";
 import { calculateRectangleFromBoundingBox } from "../common/commonPosition";
 import { isLikelyIcon } from "./iconDetection";
@@ -190,42 +189,6 @@ const processEffectVariables = async (
 };
 
 /**
- * 获取节点的颜色变量
- * @param node - 具有几何特性的节点
- * @param settings - 插件设置
- */
-const getColorVariables = async (
-  node: HasGeometryTrait,
-  settings: PluginSettings,
-) => {
-  // 尽可能快，使用Promise.all以便并行化调用
-  if (settings.useColorVariables) {
-    if (node.fills && Array.isArray(node.fills)) {
-      await Promise.all(
-        node.fills.map((fill: Paint) => processColorVariables(fill)),
-      );
-    }
-    if (node.strokes && Array.isArray(node.strokes)) {
-      await Promise.all(
-        node.strokes.map((stroke: Paint) => processColorVariables(stroke)),
-      );
-    }
-    if ("effects" in node && node.effects && Array.isArray(node.effects)) {
-      await Promise.all(
-        node.effects
-          .filter(
-            (effect: Effect) =>
-              effect.type === "DROP_SHADOW" || effect.type === "INNER_SHADOW",
-          )
-          .map((effect: DropShadowEffect | InnerShadowEffect) =>
-            processEffectVariables(effect),
-          ),
-      );
-    }
-  }
-};
-
-/**
  * 调整子节点顺序（根据布局模式）
  * @param node - 要调整子节点顺序的节点
  */
@@ -257,7 +220,6 @@ function adjustChildrenOrder(node: any) {
  * 现在包括convertNodeToAltNode的功能
  * @param jsonNode - 要处理的JSON节点
  * @param figmaNode - 对应的Figma节点
- * @param settings - 插件设置
  * @param parentNode - 可选的父节点引用
  * @param parentCumulativeRotation - 可选的父级累积旋转角度
  * @returns 可能修改的jsonNode、节点数组（用于内联组）或null
@@ -265,7 +227,6 @@ function adjustChildrenOrder(node: any) {
 const processNodePair = async (
   jsonNode: AltNode,
   figmaNode: SceneNode,
-  settings: PluginSettings,
   parentNode?: AltNode,
   parentCumulativeRotation: number = 0,
 ): Promise<Node | Node[] | null> => {
@@ -296,7 +257,6 @@ const processNodePair = async (
     return processNodePair(
       jsonNode,
       figmaNode,
-      settings,
       parentNode,
       parentCumulativeRotation,
     );
@@ -330,7 +290,6 @@ const processNodePair = async (
         const processedChild = await processNodePair(
           child,
           figmaChild,
-          settings,
           parentNode, // 组的父节点
           parentCumulativeRotation + (jsonNode.rotation || 0),
         );
@@ -406,7 +365,7 @@ const processNodePair = async (
         styledTextSegments.map(async (segment, index) => {
           const mutableSegment: any = Object.assign({}, segment);
 
-          if (settings.useColorVariables && segment.fills) {
+          if (segment.fills) {
             mutableSegment.fills = await Promise.all(
               segment.fills.map(async (d) => {
                 if (
@@ -475,12 +434,12 @@ const processNodePair = async (
   }
 
   // 添加canBeFlattened属性
-  if (settings.embedVectors && !parentNode?.canBeFlattened) {
+  if (!parentNode?.canBeFlattened) {
     const isIcon = isLikelyIcon(jsonNode as any);
     (jsonNode as any).canBeFlattened = isIcon;
 
     // 如果此节点将被展平为SVG，收集其颜色变量
-    if (isIcon && settings.useColorVariables) {
+    if (isIcon) {
       // 在变量处理后安排颜色映射收集
       (jsonNode as any)._collectColorMappings = true;
     }
@@ -500,9 +459,6 @@ const processNodePair = async (
     (jsonNode as any).strokeRightWeight =
       jsonNode.individualStrokeWeights.right;
   }
-
-  // 获取颜色变量
-  await getColorVariables(jsonNode, settings);
 
   // 某些地方检查paddingLeft是否存在。这确保它们都存在，即使为0。
   if ("layoutMode" in jsonNode && jsonNode.layoutMode) {
@@ -580,7 +536,6 @@ const processNodePair = async (
       const processedChild = await processNodePair(
         child,
         figmaChild,
-        settings,
         jsonNode,
         cumulative,
       );
@@ -625,12 +580,10 @@ const processNodePair = async (
 /**
  * 将Figma节点转换为带有父节点引用的JSON格式
  * @param nodes - 要转换为JSON的Figma节点
- * @param settings - 插件设置
  * @returns 带有父节点引用的节点的JSON表示
  */
 export const nodesToJSON = async (
-  nodes: ReadonlyArray<SceneNode>,
-  settings: PluginSettings,
+  nodes: ReadonlyArray<SceneNode>
 ): Promise<Node[]> => {
   // 为每次转换重置名称计数器
   nodeNameCounters.clear();
@@ -680,7 +633,6 @@ export const nodesToJSON = async (
     const processedNode = await processNodePair(
       nodeResults[i].nodeDoc,
       nodes[i],
-      settings,
       undefined,
       nodeResults[i].nodeCumulativeRotation,
     );

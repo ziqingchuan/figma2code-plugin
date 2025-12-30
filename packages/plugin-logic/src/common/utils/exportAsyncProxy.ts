@@ -30,28 +30,19 @@ export const exportAsyncProxy = async <
 
   // 异步获取节点实例
   const figmaNode = (await figma.getNodeByIdAsync(node.id)) as ExportMixin;
-  // console.log("[导出代理] 获取节点实例:", figmaNode);
+ 
 
-  // 检查节点是否支持导出
-  if (figmaNode.exportAsync === undefined) {
-    console.error("[导出代理] 错误节点详情:", node);
-    throw new TypeError(
-      "导出失败：该节点不支持exportAsync()方法。调用前请检查节点类型。",
-    );
-  }
 
   let result;
   try {
     // 根据格式类型调用不同的导出方法
     if (settings.format === "SVG_STRING") {
-      // console.log("[导出代理] 导出SVG字符串");
       result = await figmaNode.exportAsync(settings as ExportSettingsSVGString);
     } else {
-      // console.log("[导出代理] 导出其他格式");
+
       result = await figmaNode.exportAsync(settings as ExportSettings);
     }
   } catch (error) {
-    console.error("[导出代理] 导出过程中出错:", error);
     throw error;
   } finally {
     // 无论成功失败，都重置运行状态

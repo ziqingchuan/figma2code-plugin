@@ -1,71 +1,23 @@
-import { htmlMain, postSettingsChanged, run } from "backend";
+import { htmlMain, run } from "backend";
 import { nodesToJSON } from "backend/src/altNodes/jsonNodeConversion";
 import { htmlCodeGenTextStyles } from "backend/src/html/htmlMain";
-import { PluginSettings, SettingWillChangeMessage } from "types";
+import { PluginSettings } from "types";
 
-let userPluginSettings: PluginSettings;
-
-// 默认插件设置
-export const defaultPluginSettings: PluginSettings = {
+// 使用固定默认设置
+const defaultSettings: PluginSettings = {
   framework: "HTML",
   showLayerNames: false,
   responsiveRoot: false,
-  useColorVariables: true,
   embedImages: true,
   embedVectors: true,
   htmlGenerationMode: "html",
-};
-
-// 类型守卫，确保key属于PluginSettings类型
-function isKeyOfPluginSettings(key: string): key is keyof PluginSettings {
-  return key in defaultPluginSettings;
-}
-
-// 获取用户设置
-const getUserSettings = async () => {
-  // console.log("[调试] 开始获取用户设置");
-  const possiblePluginSrcSettings =
-    (await figma.clientStorage.getAsync("userPluginSettings")) ?? {};
-  console.log(
-    "[调试] 从存储中获取的原始设置:",
-    possiblePluginSrcSettings,
-  );
-
-  // 合并默认设置和用户设置
-  const updatedPluginSrcSettings = {
-    ...defaultPluginSettings,
-    ...Object.keys(defaultPluginSettings).reduce((validSettings, key) => {
-      if (
-        isKeyOfPluginSettings(key) &&
-        key in possiblePluginSrcSettings &&
-        typeof possiblePluginSrcSettings[key] ===
-        typeof defaultPluginSettings[key]
-      ) {
-        validSettings[key] = possiblePluginSrcSettings[key] as any;
-      }
-      return validSettings;
-    }, {} as Partial<PluginSettings>),
-  };
-
-  userPluginSettings = updatedPluginSrcSettings as PluginSettings;
-  // console.log("[调试] 最终用户设置:", userPluginSettings);
-  return userPluginSettings;
-};
-
-// 初始化设置
-const initSettings = async () => {
-  // console.log("[调试] 正在初始化插件设置");
-  await getUserSettings();
-  postSettingsChanged(userPluginSettings);
-  // console.log("[调试] 使用设置调用safeRun");
-  safeRun(userPluginSettings);
 };
 
 // 防止重复执行的标志
 let isLoading = false;
 
 // 安全运行函数
-const safeRun = async (settings: PluginSettings) => {
+const safeRun = async () => {
   console.log(
     "[调试] safeRun调用 - isLoading = ",
     isLoading,
@@ -82,7 +34,7 @@ const safeRun = async (settings: PluginSettings) => {
         // console.log("[调试] 检测到selectionchange事件，已忽略");
       });
 
-      await run(settings);
+      await run(defaultSettings);
       // console.log("[调试] run执行完成");
 
       // 延迟重置isLoading，确保在下一帧执行
@@ -122,7 +74,7 @@ const safeRun = async (settings: PluginSettings) => {
 const standardMode = async () => {
   // console.log("[调试] 正在初始化标准模式");
   figma.showUI(__html__, { width: 450, height: 700, themeColors: true });
-  await initSettings();
+  safeRun();
 
   // 监听选择变化事件
   figma.on("selectionchange", () => {
@@ -130,7 +82,7 @@ const standardMode = async () => {
       "[调试] selectionchange事件 - 新选择:",
       figma.currentPage.selection,
     );
-    safeRun(userPluginSettings);
+    safeRun();
   });
 
   // 加载所有页面并监听文档变化
@@ -141,20 +93,14 @@ const standardMode = async () => {
     // 原因是代码会临时隐藏组的子元素以导出干净的图像，然后恢复子元素的可见性。
     // 这构成了文档更改，因此会重新开始整个转换过程。
     // 为了避免这种情况，在进行转换时禁用safeRun（当isLoading === true时）。
-    safeRun(userPluginSettings);
+    safeRun();
   });
 
   // 处理UI消息
   figma.ui.onmessage = async (msg) => {
     // console.log("[调试] 收到UI消息", msg);
 
-    if (msg.type === "pluginSettingWillChange") {
-      const { key, value } = msg as SettingWillChangeMessage<unknown>;
-      // console.log(`[调试] 设置变更: ${key} = ${value}`);
-      (userPluginSettings as any)[key] = value;
-      figma.clientStorage.setAsync("userPluginSettings", userPluginSettings);
-      safeRun(userPluginSettings);
-    } else if (msg.type === "get-selection-json") {
+    if (msg.type === "get-selection-json") {
       // console.log("[调试] 收到get-selection-json消息");
 
       const nodes = figma.currentPage.selection;
@@ -173,7 +119,6 @@ const standardMode = async () => {
       } = {};
 
       try {
-        // 导出JSON格式
         result.json = (await Promise.all(
           nodes.map(
             async (node) =>
@@ -190,7 +135,7 @@ const standardMode = async () => {
 
       try {
         // 转换为新格式
-        const newNodes = await nodesToJSON(nodes, userPluginSettings);
+        const newNodes = await nodesToJSON(nodes);
         const removeParent = (node: any) => {
           if (node.parent) {
             delete node.parent;
@@ -221,7 +166,6 @@ const standardMode = async () => {
 // 代码生成模式
 const codegenMode = async () => {
   // console.log("[调试] 正在初始化代码生成模式");
-  await getUserSettings();
 
   // 监听代码生成事件
   figma.codegen.on(
@@ -232,7 +176,7 @@ const codegenMode = async () => {
         node,
       );
 
-      const convertedSelection = await nodesToJSON([node], userPluginSettings);
+      const convertedSelection = await nodesToJSON([node]);
       console.log(
         "[调试] codegen.generate - 转换后的选择:",
         convertedSelection,
@@ -241,14 +185,14 @@ const codegenMode = async () => {
         {
           title: "代码",
           code: (
-            await htmlMain(
-              "codegenMode",
-              // @ts-ignore
-              convertedSelection,
-              { ...userPluginSettings, htmlGenerationMode: "html" },
-              true,
-            )
-          ).html,
+          await htmlMain(
+            "codegenMode",
+            // @ts-ignore
+            convertedSelection,
+            { ...defaultSettings, htmlGenerationMode: "html" },
+            true,
+          )
+        ).html,
           language: "HTML",
         },
         {
@@ -265,11 +209,9 @@ const codegenMode = async () => {
 switch (figma.mode) {
   case "default":
   case "inspect":
-    // console.log("[调试] 以", figma.mode, "模式启动插件");
     standardMode();
     break;
   case "codegen":
-    // console.log("[调试] 以代码生成模式启动插件");
     codegenMode();
     break;
   default:

@@ -2,8 +2,6 @@ import {
   ConversionMessage,
   ConversionStartMessage,
   EmptyMessage,
-  PluginSettings,
-  SettingsChangedMessage,
 } from "types";
 
 export const postBackendMessage = figma.ui.postMessage;
@@ -17,10 +15,3 @@ export const postConversionStart = () =>
 export const postConversionComplete = (
   conversionData: ConversionMessage | Omit<ConversionMessage, "type">,
 ) => postBackendMessage({ ...conversionData, type: "code" });
-
-
-export const postSettingsChanged = (settings: PluginSettings) =>
-  postBackendMessage({
-    type: "pluginSettingsChanged",
-    settings,
-  } as SettingsChangedMessage);

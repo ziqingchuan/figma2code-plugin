@@ -8,7 +8,6 @@ import {
 } from "./common/commonWarning";
 import { postConversionComplete, postEmptyMessage } from "./messaging";
 import { generateHTMLPreview } from "./html/htmlMain";
-// import { oldConvertNodesToAltNodes } from "./altNodes/oldAltConversion";
 import {
   getNodeByIdAsyncCalls,
   getNodeByIdAsyncTime,
@@ -58,13 +57,8 @@ export const run = async (settings: PluginSettings) => {
 
   let convertedSelection: any;
 
-  convertedSelection = await nodesToJSON(selection, settings);
-  // console.log(`[性能监控] 节点转换耗时: ${Date.now() - nodeToJSONStart}毫秒`);
-  // console.log("[调试] 节点JSON数据:", convertedSelection);
-  
-
-  // 调试输出第一个节点的信息
-  // console.log("[调试] 转换后的节点详情:", { ...convertedSelection[0] });
+  convertedSelection = await nodesToJSON(selection);
+ 
 
   // 如果转换结果为空，发送空消息并返回
   if (convertedSelection.length === 0) {

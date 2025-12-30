@@ -5,7 +5,6 @@ export interface HTMLSettings {
   showLayerNames: boolean;
   embedImages: boolean;
   embedVectors: boolean;
-  useColorVariables: boolean;
   htmlGenerationMode: "html";
 }
 
