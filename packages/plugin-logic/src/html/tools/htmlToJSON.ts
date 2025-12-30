@@ -1,6 +1,6 @@
 import { HtmlNode } from "../../node_types";
 
-export const parseHTMLToNodes = (htmlString: string, useAI: boolean): any => {
+export const parseHTMLToNodes = (htmlString: string): any => {
   let index = 0;
   const nodes: HtmlNode[] = [];
   let svgContentIndex = 1;
@@ -125,8 +125,8 @@ export const parseHTMLToNodes = (htmlString: string, useAI: boolean): any => {
     classNameIndex++;
 
     // if(!useAI){
-    //   /** 人工生成类名 */
-    //   className = generateSemanticClassName(tagName, styleID, content, parentInfo, styleMap);
+      /** 人工生成类名 */
+      // className = generateSemanticClassName(tagName, styleID, content, parentInfo, styleMap);
     // }
       /** 调用AI单独为单个元素生成类名 */
       // const singleNode = {

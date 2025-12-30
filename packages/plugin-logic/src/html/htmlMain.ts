@@ -17,10 +17,12 @@ import {
   nodeHasImageFill,
 } from "../common/commonImage";
 import { addWarning } from "../common/commonWarning";
-import { parseHTMLToNodes } from "./tools/htmlToJSON";
-import { parseNodesToHTML } from "./tools/jsonToHTML";
-// import { isStructureIdentical } from "./tools/structureCompare";
-// import { TAL_AI } from "./tools/LLM";
+import {
+  parseHTMLToNodes
+} from "./tools/htmlToJSON";
+import {
+  parseNodesToHTML
+} from "./tools/jsonToHTML";
 import { cozeGenTotal } from "./tools/cozeForTotal";
 // 全局预览标志
 export let isPreviewGlobal = false;
@@ -120,13 +122,11 @@ const optimizeOutput = async (output: HtmlOutput): Promise<HtmlOutput> => {
   let AIclassNameMap; // AI处理后的类名映射
 
   // 解析HTML为节点结构
-  const { nodes, svgContentMap, styleMap, classNameMap } = parseHTMLToNodes(
-    output.html,
-    true,
-  );
+  const { nodes, svgContentMap, styleMap, classNameMap } = parseHTMLToNodes(output.html);
   jsonNodes = nodes;
   svgMap = svgContentMap;
   styleContentMap = styleMap;
+  classMap = classNameMap; // 默认使用人工类名
   console.log("[调试] parseHTMLToNodes解析完成的节点数据:", jsonNodes);
 
   try {
@@ -134,28 +134,17 @@ const optimizeOutput = async (output: HtmlOutput): Promise<HtmlOutput> => {
     // TODO: 回退工作流
     console.log("[调试] AI处理后的结果:", AIclassNameMap);
 
-
+    // 检查AI处理结果与人工生成结果的数量是否一致
     const aiCount = Object.keys(AIclassNameMap).length;
     const manualCount = Object.keys(classNameMap).length;
-    // const aiCount = 0
+    console.log(`[调试] AI键数量: ${aiCount} vs 人工键数量: ${manualCount}`);
 
-    if (aiCount !== manualCount) {
-      console.log(`[警告] AI处理结果与人工生成结果不一致: 
-    AI键数量: ${aiCount} vs 人工键数量: ${manualCount}`);
-      classMap = classNameMap;
-    } else {
+    // 如果结构一致且数量一致，使用AI生成的类名；否则使用人工类名
+    if (aiCount === manualCount) {
       classMap = AIclassNameMap;
+    } else {
+      console.log("[警告] JSON结构不一致或数量不匹配，使用人工类名");
     }
-    // // 检查json结构是否一致
-    // console.log("[调试] 节点结构比对结果:", isStructureIdentical(jsonNodes, processedNodes))
-    //
-    // if(!isStructureIdentical(jsonNodes, processedNodes)) {
-    //   // 如果结构不一致，使用人工生成的类名
-    //   const { nodes, svgContentMap, styleMap } = parseHTMLToNodes(output.html, false);
-    //   processedNodes = nodes;
-    //   svgMap = svgContentMap;
-    //   styleContentMap = styleMap;
-    // }
   } catch (error: any) {
     console.error("[错误] 节点处理出错:", error);
   } finally {

@@ -13,7 +13,6 @@ export interface HTMLSettings {
 export interface PluginSettings
   extends HTMLSettings {
   framework: Framework;
-  useOldPluginVersion2025: boolean;
   responsiveRoot: boolean;
 }
 // Messaging

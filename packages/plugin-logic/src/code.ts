@@ -8,7 +8,7 @@ import {
 } from "./common/commonWarning";
 import { postConversionComplete, postEmptyMessage } from "./messaging";
 import { generateHTMLPreview } from "./html/htmlMain";
-import { oldConvertNodesToAltNodes } from "./altNodes/oldAltConversion";
+// import { oldConvertNodesToAltNodes } from "./altNodes/oldAltConversion";
 import {
   getNodeByIdAsyncCalls,
   getNodeByIdAsyncTime,
@@ -45,7 +45,6 @@ export const run = async (settings: PluginSettings) => {
   // 清空之前的警告信息
   clearWarnings();
 
-  const { useOldPluginVersion2025 } = settings;
   const selection = figma.currentPage.selection;
 
   // 如果没有选中任何节点，发送空消息并返回
@@ -58,15 +57,11 @@ export const run = async (settings: PluginSettings) => {
   const nodeToJSONStart = Date.now();
 
   let convertedSelection: any;
-  // 根据设置决定使用旧版还是新版转换逻辑
-  if (useOldPluginVersion2025) {
-    convertedSelection = oldConvertNodesToAltNodes(selection, null);
-    // console.log("[调试] 转换后的节点数据(旧版):", convertedSelection);
-  } else {
-    convertedSelection = await nodesToJSON(selection, settings);
-    // console.log(`[性能监控] 节点转换耗时: ${Date.now() - nodeToJSONStart}毫秒`);
-    // console.log("[调试] 节点JSON数据:", convertedSelection);
-  }
+
+  convertedSelection = await nodesToJSON(selection, settings);
+  // console.log(`[性能监控] 节点转换耗时: ${Date.now() - nodeToJSONStart}毫秒`);
+  // console.log("[调试] 节点JSON数据:", convertedSelection);
+  
 
   // 调试输出第一个节点的信息
   // console.log("[调试] 转换后的节点详情:", { ...convertedSelection[0] });

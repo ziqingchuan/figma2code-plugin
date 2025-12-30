@@ -9,7 +9,6 @@ let userPluginSettings: PluginSettings;
 export const defaultPluginSettings: PluginSettings = {
   framework: "HTML",
   showLayerNames: false,
-  useOldPluginVersion2025: false,
   responsiveRoot: false,
   useColorVariables: true,
   embedImages: true,

@@ -28,31 +28,6 @@ export function isNotEmpty<TValue>(
   return value !== null && value !== undefined;
 }
 
-// 使用柯里化创建一个函数，检查节点是否属于指定类型或其所有子节点都属于指定类型
-export const isTypeOrGroupOfTypes = curry(
-  (matchTypes: NodeType[], node: SceneNode): boolean => {
-    // 检查当前节点类型是否在匹配类型数组中
-    if (matchTypes.includes(node.type)) return true;
-
-    // 只有容器类型的节点才检查其子节点
-    if ("children" in node) {
-      for (let i = 0; i < node.children.length; i++) {
-        const childNode = node.children[i];
-        const result = isTypeOrGroupOfTypes(matchTypes, childNode);
-        // 如果任何子节点不属于指定类型，返回false
-        if (!result) {
-          return false;
-        }
-      }
-      // 所有子节点都是有效类型，并且节点有子节点时才返回true
-      return node.children.length > 0;
-    }
-
-    // 非容器节点且类型不匹配时返回false
-    return false;
-  },
-);
-
 // 渲染节点为SVG并附加到节点对象上的异步函数
 export const renderAndAttachSVG = async (node: any) => {
   // 只有可以扁平化的节点才处理SVG
