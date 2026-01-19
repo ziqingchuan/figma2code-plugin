@@ -87,8 +87,38 @@ export default function App() {
     };
   }, []);
 
+  // 模拟错误的函数
+  const simulateError = () => {
+    const errorMessages = [
+      "节点解析失败：不支持的图层类型",
+      "Failed to export node. This node may not have any visible layers.",
+      "SVG渲染失败： VECTOR:34:36",
+      "代码转换超时：请重试",
+    ];
+    const randomError = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+    
+    setState({
+      code: `
+      非常抱歉，转换出现错误 :(
+      报错原因： ${randomError}
+      `,
+      isLoading: false,
+      htmlPreview: emptyPreview,
+    });
+  };
+
   return (
     <div>
+      {/* 演示用的错误模拟按钮
+      <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+        <button
+          onClick={simulateError}
+          className="w-full bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 px-4 rounded transition-colors"
+          title="点击以模拟不同类型的错误"
+        >
+          ⚠️ 模拟错误（演示用）
+        </button>
+      </div> */}
       <PluginUI
         isLoading={state.isLoading}
         code={state.code}
