@@ -1,7 +1,7 @@
 import { HtmlNode } from "../../node_types";
 
 const COZE_API_WORKFLOW = 'https://api.coze.cn/v1/workflow/run'
-const COZE_AUTH_TOKEN = 'pat_VfbV3r9a77ajA6cBDlqc0XUM6Tqzrh6GiHoOkL8DVX7UQKN1SPRRev3jtwvjgCub'
+const COZE_AUTH_TOKEN = 'pat_0ggJT15MY8g37qm5NIbgUYzRCHLpnl6uvHuk63acDL3RMHymDNBkoim5TRZPUdak'
 const COZE_WORKFLOW_ID = '7540216444618588206' // 工作流ID，可在Coze控制台查看
 
 /**
